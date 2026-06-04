@@ -1,0 +1,8 @@
+admin
+password
+12345
+123456
+secret
+qwerty
+kerem123
+test

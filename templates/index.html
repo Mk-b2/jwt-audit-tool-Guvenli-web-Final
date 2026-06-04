@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Security Audit | Mehmet Kerem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-gradient: radial-gradient(circle at top center, #1a1528 0%, #050505 50%);
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --accent-cyan: #00e5ff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --panel-bg: rgba(22, 27, 34, 0.5);
+        }
+
+        /* Gündüz Modu Renkleri */
+        body.light-mode {
+            --bg-dark: #f6f8fa;
+            --bg-gradient: none;
+            --text-main: #24292f;
+            --text-muted: #57606a;
+            --accent-cyan: #0969da;
+            --border-color: #d0d7de;
+            --panel-bg: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            width: 100%;
+            padding: 20px 50px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--accent-cyan);
+        }
+
+        /* İkonlu Tema Değiştirme Butonu */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0;
+        }
+
+        .theme-toggle:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.light-mode .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* İkonların Görünürlük Ayarı */
+        .sun-icon { display: none; }
+        .moon-icon { display: block; }
+        
+        body.light-mode .sun-icon { display: block; }
+        body.light-mode .moon-icon { display: none; }
+
+        .hero {
+            text-align: center;
+            margin-top: 80px;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+        }
+
+        .badge .dot {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px var(--accent-cyan);
+            margin-right: 8px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            letter-spacing: -1px;
+        }
+
+        body:not(.light-mode) h1 {
+            background: linear-gradient(to right, #ffffff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 50px;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            max-width: 500px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+        }
+
+        button.primary-btn {
+            background-color: var(--accent-cyan);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0 35px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        body:not(.light-mode) button.primary-btn {
+            color: #000000;
+        }
+
+        button.primary-btn:hover {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .terminal-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-bottom: 50px;
+            text-align: left;
+            display: none; 
+        }
+
+        .terminal-header {
+            background: rgba(0,0,0,0.1);
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mac-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .close { background: #ff5f56; }
+        .min { background: #ffbd2e; }
+        .max { background: #27c93f; }
+        
+        .terminal-title {
+            margin-left: 15px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .terminal-body {
+            padding: 25px;
+            height: 350px;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            color: #27c93f; 
+            line-height: 1.6;
+        }
+        
+        body.light-mode .terminal-body {
+            color: #0969da;
+        }
+
+        #output {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Mehmet Kerem<span>.</span></div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Temayı Değiştir">
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+    </nav>
+
+    <div class="hero">
+        <div class="badge">
+            <span class="dot">●</span> JWT GÜVENLİK DENETİM ARACI
+        </div>
+        
+        <h1>JWT Security Audit.</h1>
+        <p class="subtitle">JSON Web Token'lar (JWT) üzerindeki zayıf şifreleme algoritmalarını, imza atlatma zafiyetlerini ve hassas veri sızıntılarını otomatik tespit edin.</p>
+
+        <div class="input-group">
+            <input type="text" id="tokenInput" placeholder="Hedef JWT'yi buraya yapıştırın (eyJh...)">
+            <button class="primary-btn" onclick="startAudit()">Analiz Et</button>
+        </div>
+    </div>
+
+    <div class="terminal-wrapper" id="terminalWrapper">
+        <div class="terminal-header">
+            <div class="mac-btn close"></div>
+            <div class="mac-btn min"></div>
+            <div class="mac-btn max"></div>
+            <div class="terminal-title">bash - audit_engine - 80x24</div>
+        </div>
+        <div class="terminal-body">
+            <pre id="output"></pre>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        async function startAudit() {
+            const token = document.getElementById('tokenInput').value;
+            const terminalWrapper = document.getElementById('terminalWrapper');
+            const outputEl = document.getElementById('output');
+            
+            if (!token) {
+                alert("Lütfen geçerli bir token girin.");
+                return;
+            }
+
+            terminalWrapper.style.display = 'block';
+            outputEl.innerHTML = "> Hedef token işleniyor...\n> Analiz motoru başlatılıyor...\n\n";
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                });
+
+                const data = await response.json();
+                typeWriter(data.result, outputEl);
+                
+            } catch (error) {
+                outputEl.innerHTML += "\n[!] Sunucu bağlantı hatası: " + error;
+            }
+        }
+
+        function typeWriter(text, element) {
+            element.innerHTML = "";
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 3);
+                }
+            }
+            type();
+        }
+    </script>
+
+</body>
+</html>
