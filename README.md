@@ -1,3 +1,16 @@
+
+Markdown
+**BİLİŞİM GÜVENLİĞİ TEKNOLOJİSİ**
+
+* **Öğrenci:** Mehmet Kerem Bıyık
+* **Okul No:** 2420191046
+* **Ders Adı:** Tersine Mühendislik
+* **Öğretim Görevlisi:** Keyvan Arasteh Abbasabad
+
+---
+
+
+
 # 🔍 JWT Security Audit Tool (JWT Güvenlik Denetim Aracı)
 
 Bu proje, JSON Web Token'ların (JWT) içerebileceği güvenlik zafiyetlerini tespit etmek ve analiz etmek amacıyla geliştirilmiş bir Siber Güvenlik aracıdır. Zayıf şifreleme algoritmaları, imza atlatma denemeleri ve hassas veri sızıntılarını otomatik olarak tarar. Hem komut satırından (CLI) hem de modern bir Web Arayüzünden (Web UI) kullanılabilir.
